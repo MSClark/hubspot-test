@@ -4,6 +4,6 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class CountriesResponse {
-    private List<Country> countries;
+public class InvitationList {
+    private List<CountryInvitation> countries;
 }

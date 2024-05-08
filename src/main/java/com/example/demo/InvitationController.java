@@ -9,17 +9,17 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @org.springframework.web.bind.annotation.RestController
 @RequestMapping("/partner-api")
-public class RestController {
-    private final PartnerService partnerService;
+public class InvitationController {
+    private final InvitationService invitationService;
 
-    public RestController(PartnerService partnerService) {
-        this.partnerService = partnerService;
+    public InvitationController(InvitationService invitationService) {
+        this.invitationService = invitationService;
     }
 
     @RequestMapping(value = "/partners", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity getPartners() throws JsonProcessingException {
-         return partnerService.findBestDates(partnerService.sortPartners(partnerService.getPartners()));
+         return invitationService.findBestDatesThenSendInvitation(invitationService.sortPartnersByCountry(invitationService.getPartners()));
     }
 
 }

@@ -4,7 +4,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class Country {
+public class CountryInvitation {
     private int attendeeCount;
     private List<String> attendees;
     private String name;
