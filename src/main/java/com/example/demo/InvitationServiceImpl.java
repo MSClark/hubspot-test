@@ -45,28 +45,30 @@ public class InvitationServiceImpl implements InvitationService {
             List<Partner> partnersList = entry.getValue();
 
             Map<LocalDate, List<Partner>> dateToPartnersMap = new HashMap<>();
-            for (Partner partner : partnersList) {
-                List<LocalDate> sortedDates = partner.getAvailableDates().stream() //
+            partnersList.forEach(partner -> {
+                List<LocalDate> sortedDates = partner.getAvailableDates().stream() //For each partner in a particular country get the list of dates
                         .map(date -> LocalDate.parse(date, formatter))
-                        .sorted() // Sort dates to satisfy OCD
-                        .collect(Collectors.toList());
+                        .sorted()
+                        .toList();
 
                 for (int i = 0; i < sortedDates.size() - 1; i++) {
                     LocalDate currentDate = sortedDates.get(i);
                     LocalDate nextDate = sortedDates.get(i + 1);
 
-                    if (currentDate.plusDays(1).equals(nextDate)) {
+                    if (currentDate.plusDays(1).equals(nextDate)) { //add partner to availability map if they are available on consecutive days
                         dateToPartnersMap.computeIfAbsent(currentDate, k -> new ArrayList<>()).add(partner);
                     }
                 }
-            }
+            });
 
             Map<Integer, List<Map.Entry<LocalDate, List<Partner>>>> groupedByCount = dateToPartnersMap.entrySet().stream()
-                    .collect(Collectors.groupingBy(e -> e.getValue().size()));
+                    .collect(Collectors.groupingBy(e -> e.getValue().size())); //Group partners by count of consecutive days they are available
 
-            int maxCount = Collections.max(groupedByCount.keySet());
+
+            int maxCount = Collections.max(groupedByCount.keySet()); // Get the dates with the maximum number of partners who can attend
             List<Map.Entry<LocalDate, List<Partner>>> bestDates = groupedByCount.get(maxCount);
 
+            //Choose earliest date if there are multiple.
             Map.Entry<LocalDate, List<Partner>> earliestBestDate = bestDates.stream()
                     .min(Map.Entry.comparingByKey())
                     .orElse(null);
@@ -74,7 +76,7 @@ public class InvitationServiceImpl implements InvitationService {
             CountryInvitation countryInvitation = new CountryInvitation();
             countryInvitation.setName(countryName);
 
-            if (earliestBestDate != null) {
+            if (earliestBestDate != null) { //build invitation object per country
                 countryInvitation.setStartDate(earliestBestDate.getKey().toString());
                 countryInvitation.setAttendeeCount(earliestBestDate.getValue().size());
                 countryInvitation.setAttendees(earliestBestDate.getValue().stream().map(Partner::getEmail).collect(Collectors.toList()));
@@ -94,9 +96,10 @@ public class InvitationServiceImpl implements InvitationService {
         InvitationList invitationList = new InvitationList();
         invitationList.setCountries(countryInvitationResponse);
         ObjectMapper objectMapper = new ObjectMapper();
-        System.out.println(objectMapper.writeValueAsString(invitationList));
-        System.out.println(invitationList);
+        System.out.println(objectMapper.writeValueAsString(invitationList));//debugging
+
         ResponseEntity<InvitationList> responseEntity = restTemplate.postForEntity(postPartnersUrl, invitationList, InvitationList.class);
+
         return responseEntity;
     }
 }
