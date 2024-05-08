@@ -98,6 +98,8 @@ public class InvitationServiceImpl implements InvitationService {
         ObjectMapper objectMapper = new ObjectMapper();
         System.out.println(objectMapper.writeValueAsString(invitationList));//debugging
 
+        //TODO extract into separate method
+
         ResponseEntity<InvitationList> responseEntity = restTemplate.postForEntity(postPartnersUrl, invitationList, InvitationList.class);
 
         return responseEntity;
